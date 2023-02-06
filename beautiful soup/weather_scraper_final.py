@@ -5,9 +5,10 @@ from bs4 import BeautifulSoup
 from pprint import pprint
 from tqdm import tqdm
 import re
+import time
 
-
-page_selector = pd.date_range(start = '1/1/2009', end= '5/1/2009', freq= 'M')
+start = time.time()
+page_selector = pd.date_range(start = '1/1/2009', end= '11/1/2020', freq= 'M')
 dates= []
 for i in page_selector:
     combined_date= str(i)[:4]+str(i)[5:7]
@@ -56,3 +57,5 @@ for k in tqdm(range(len(dates))):
 
     file = open('Weather_Data.csv','r')
 
+end = time.time()
+print(end-start)
