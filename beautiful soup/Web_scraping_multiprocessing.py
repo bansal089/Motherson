@@ -6,19 +6,21 @@ from pprint import pprint
 from tqdm import tqdm
 import re
 import time
-from multiprocessing import pool
+from multiprocessing import Pool
 
-page_selector = pd.date_range(start = '1/1/2009', end= '11/1/2020', freq= 'M')
+page_selector = pd.date_range(start = '1/1/2009', end= '11/1/2021', freq= 'M')
 dates= []
-for i in page_selector:
-    combined_date= str(i)[:4]+str(i)[5:7]
-    dates.append(combined_date)
+
+def occuring_months():
+    for i in page_selector:
+        combined_date= str(i)[:4]+str(i)[5:7]
+        dates.append(combined_date)
 
 data_list= []
 date_index= []
 
-for k in tqdm(range(len(dates))):
-    url= "http://www.estesparkweather.net/archive_reports.php?date="+ dates[k]
+def scraper(dates):
+    url= "http://www.estesparkweather.net/archive_reports.php?date="+ dates
     page= requests.get(url)
     soup= BeautifulSoup(page.content, 'html.parser')
     tables= soup.find_all('table')
@@ -36,7 +38,7 @@ for k in tqdm(range(len(dates))):
     # print(raw_data)
         data_list.append(raw_data)
     # print(data_list)
-        date_index.append(dates[k] + raw_data[0])
+        date_index.append(dates + raw_data[0])
     # pprint(date_index)
 
     formated_data= [data_list[i][1:] for i in range(len(data_list)) if len(data_list[i][1:]) == 19]
@@ -53,7 +55,19 @@ for k in tqdm(range(len(dates))):
         
     final_data = pd.DataFrame(formated_data, columns = col, index = f_index)
     print(final_data.head())   
-    # final_data.to_csv("Weather_Data.csv")
+# final_data.to_csv("Weather_Data.csv")
+    return final_data
 
+
+def run():
+    p= Pool()
+    x= p.map(scraper, dates)
+    p.terminate()
+    # p.join()  
     
-
+if __name__ == "__main__":
+    start= time.time()
+    occuring_months()
+    run()
+    end= time.time()
+    print(end-start)
